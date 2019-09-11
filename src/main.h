@@ -1,0 +1,4 @@
+#define SS_PIN 15
+#define RST_PIN 0
+#define WAIT_TIMER_TIME 60000
+#define WELCOME_TIMER 10000
