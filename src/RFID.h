@@ -6,11 +6,18 @@
 MFRC522 rfid(SS_PIN, RST_PIN);
 
 byte code[2][4] = {
-                {101,29,31,25}, // Test
+                {139,215,218,43}, // Test
                 {45,191,19,211} // Enes
                   };
+
+String person[2] = {
+                "Test",
+                "Enes"
+                  };
+int id_person;
 String id_str;
 bool flag_online;
+
 
 
 
@@ -45,6 +52,7 @@ void readRFID()
                     // Что делаем если код верный
                     if(r >= 3){
                         flag_online = true;
+                        id_person = i;
                         Serial.println("Activated");
                         break;
                     }

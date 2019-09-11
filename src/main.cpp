@@ -7,17 +7,26 @@
 
 OneButton button(16, false);
 
-unsigned long wait_timer;
 unsigned long timer_welcome;
 
 bool flag_wait = true;
-bool flag_wait_timer;
-bool flag_welcome_timer;
+bool flag_welcome;
+bool flag_at_home;
 
 
 
 void click1(){
-
+  if(!flag_online && !flag_wait){
+    flag_wait = true;
+  }
+  if(flag_at_home){
+    flag_online = false;
+    flag_at_home = false;
+    display.clearDisplay();
+    writeExit();
+    delay(1000);
+    display.clearDisplay();
+  } 
 }
 
 
@@ -36,31 +45,37 @@ void setup() {
 
 void loop() {
   button.tick();
+  display.display();
 
   if(flag_wait){
     writeWait();
+    if(rfid.PICC_IsNewCardPresent()){ // Если увидели новую карту, то читаем 
+		  readRFID();
+	  }
   }
 
   if(flag_online){ // Если мы дома
-    if(flag_wait){
+    if(flag_wait){ // Если был включен режим ожидания
       display.clearDisplay();
       display.display();
       flag_wait = false;
-      flag_welcome_timer = true;
+      flag_welcome = true;
+      timer_welcome = millis();
     }
-    if(flag_welcome_timer){
-      writeWelcom();
+
+    else if(flag_welcome){
+      writeWelcom(person[id_person]);
       if(millis() - timer_welcome > WELCOME_TIMER){ // Если только что зашли, отсчитываем таймер для откючения надписи
         timer_welcome = millis();
-        flag_welcome_timer = false;
+        flag_welcome = false;
+        flag_at_home = true;
         display.clearDisplay();
         display.display();
       }
     }
-  }
-  if(!flag_online){
-	  if (rfid.PICC_IsNewCardPresent()){ // Если увидели новую карту, то читаем 
-		  readRFID();
-	  }
+
+    else if(flag_at_home){ // Если мы дома то показываем на дисплее, что кто то дома 
+      writeAtHome();
+    }
   }
 }
