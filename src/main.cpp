@@ -4,6 +4,7 @@
 #include <main.h>
 #include <Display.h>
 #include <RFID.h>
+#include <Wifi.h>
 
 OneButton button(16, false);
 
@@ -31,6 +32,40 @@ void click1(){
 
 
 
+void callback(char* topic, byte* payload, unsigned int length) { // Функция в которой обрабатываются все присланные команды
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+
+
+  String strTopic = String(topic); // Строка равная топику
+  String strPayload = ""; // Создаем пустую строку, которая будет хранить весь payload
+
+
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+    strPayload = strPayload + ((char)payload[i]); // присваеваем значение по столбикам, чтобы получить всю строку
+  }
+  Serial.println();
+
+
+  if(strTopic == "picture/connect"){
+    if(strPayload == "info"){
+      client.publish("picture/connect", "connected");
+    }
+  }
+
+  else if(strTopic == "picture/info"){
+    if(strPayload == "info"){
+      //client.publish("picture/info", char_hours);
+      delay(5000);
+      //client.publish("picture/info", char_min);
+    }
+  }
+}
+
+
+
 void setup() {
   Serial.begin(9600);
 
@@ -39,12 +74,22 @@ void setup() {
   displaySetup();
 
   RFIDSetup();
+
+  setupWifi();
 }
 
 
 
 void loop() {
+  if (!client.connected()){ // Если потеряли подключение
+    reconnect(); // Переподключаемся
+    topicSub();
+    client.setCallback(callback);
+  }
+
   button.tick();
+
+
   display.display();
 
   if(flag_wait){
@@ -78,4 +123,5 @@ void loop() {
       writeAtHome();
     }
   }
+  client.loop();
 }
