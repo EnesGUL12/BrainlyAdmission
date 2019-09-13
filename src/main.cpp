@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <OneButton.h>
+#include <SoftwareSerial.h>
 
 #include <main.h>
 #include <Display.h>
@@ -7,6 +8,7 @@
 #include <Wifi.h>
 
 OneButton button(16, false);
+SoftwareSerial SIM800(0,2);
 
 unsigned long timer_welcome;
 
@@ -68,6 +70,9 @@ void callback(char* topic, byte* payload, unsigned int length) { // Функци
 
 void setup() {
   Serial.begin(9600);
+  SIM800.begin(9600);
+  SIM800.println("AT");
+  Serial.println("SIM800 is active");  
 
   button.attachClick(click1);
 
@@ -87,9 +92,15 @@ void loop() {
     client.setCallback(callback);
   }
 
+  if(SIM800.available()){
+    Serial.write(SIM800.read());
+  }
+  if(Serial.available()){
+    SIM800.write(Serial.read());
+  }
+
+
   button.tick();
-
-
   display.display();
 
   if(flag_wait){
