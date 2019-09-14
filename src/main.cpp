@@ -22,7 +22,6 @@ char char_state[10];
 
 //TODO: Добавить GSM модуль
 //TODO: Добавить индикатор питания
-//TODO: Сделать отправки состояния после ключевых действий
 
 void click1(){
   if(flag_wait){ // режим ожидания
@@ -136,10 +135,11 @@ void loop() {
         str_state.toCharArray(char_state, 10);
         client.publish("admiss/state", "mistake");
       }
-
-      writeWait();
-      if(rfid.PICC_IsNewCardPresent()){ // Если увидели новую карту, то читаем 
-        readRFID();
+      else{
+        writeWait();
+        if(rfid.PICC_IsNewCardPresent()){ // Если увидели новую карту, то читаем 
+          readRFID();
+        }
       }
     }
 
