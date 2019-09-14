@@ -20,21 +20,32 @@ bool flag_at_home;
 String str_state;
 char char_state[10];
 
-
+//TODO: Добавить GSM модуль
+//TODO: Добавить индикатор питания
+//TODO: Сделать отправки состояния после ключевых действий
 
 void click1(){
   if(flag_wait){ // режим ожидания
     flag_wait = false; // то выключаем режим ожидания
-  }
-  if(!flag_online && !flag_wait){ // если не авторизованы и не ожидаем
-    flag_wait = true; // включаем режим ожидания
-  }
-  if(flag_at_home){ // если дома
-    flag_online = false; // то меням на режим не дома или выход
-    flag_at_home = false;
-    client.publish("admiss/state", "exit");
     str_state = "not_at_home";
     str_state.toCharArray(char_state, 10);
+    client.publish("admiss/state", "mistake");
+    display.clearDisplay();
+    display.display();
+  }
+  else if(!flag_online && !flag_wait){ // если не авторизованы и не ожидаем
+    flag_wait = true; // включаем режим ожидания
+    timer_wait = millis();
+    str_state = "wait";
+    str_state.toCharArray(char_state, 10);
+    client.publish("admiss/state", "wait");
+  }
+  else if(flag_at_home){ // если дома
+    flag_online = false; // то меням на режим не дома или выход
+    flag_at_home = false;
+    str_state = "exit";
+    str_state.toCharArray(char_state, 10);
+    client.publish("admiss/state", "exit");
     display.clearDisplay();
     writeExit();
     delay(1000);
@@ -102,6 +113,8 @@ void loop() {
     writeText("CHECK",2,0,20);
     writeText("WIFI",2,0,40);
     display.clearDisplay();
+
+  
   }
   else{
     //if(SIM800.available()){
@@ -114,12 +127,16 @@ void loop() {
     button.tick();
 
     if(flag_wait){ // Режим ожидания карточки
-      if(millis() - timer_wait > WAIT_TIMER_TIME){
+      if(millis() - timer_wait > WAIT_TIMER_TIME){ // Если прошло больше n времени то возвращаемся в режим не дома
         timer_wait = millis();
         flag_wait = false;
+        display.clearDisplay();
+        display.display();
+        str_state = "not_at_home";
+        str_state.toCharArray(char_state, 10);
+        client.publish("admiss/state", "mistake");
       }
-      str_state = "wait";
-      str_state.toCharArray(char_state, 10);
+
       writeWait();
       if(rfid.PICC_IsNewCardPresent()){ // Если увидели новую карту, то читаем 
         readRFID();
@@ -146,6 +163,7 @@ void loop() {
           flag_at_home = true;
           display.clearDisplay();
           display.display();
+          client.publish("admiss/state","at_home");
         }
       }
 
