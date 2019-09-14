@@ -54,6 +54,7 @@ void readRFID()
                         flag_online = true;
                         id_person = i;
                         Serial.println("Activated");
+                        
                         break;
                     }
                 }

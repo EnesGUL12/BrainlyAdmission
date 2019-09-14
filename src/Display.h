@@ -15,8 +15,8 @@ void displaySetup(){
 }
 
 
-void writeText(String text, int x, int y){
-  display.setTextSize(1);
+void writeText(String text,int size, int x, int y){
+  display.setTextSize(size);
   display.setTextColor(WHITE);
   display.setCursor(x,y);
   display.print(text);

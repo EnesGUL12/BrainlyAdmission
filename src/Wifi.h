@@ -39,7 +39,7 @@ void setupWifi(){ // Настройка WIFI
 
 void reconnect() { // Если мы потеряли подключение то включаем перезагрузку
   // Loop until we're reconnected
-  while (!client.connected()) {
+  while(!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Create a random client ID
     String clientId = "ESP8266Client-";
@@ -64,38 +64,6 @@ void reconnect() { // Если мы потеряли подключение то
 
 
 void topicSub(){ // Подписываемся на топики
-  client.subscribe("picture/connect");
-  client.subscribe("picture/info");
-  client.subscribe("picture/brightness");
-  client.subscribe("picture/auto");
-  client.subscribe("picture/save");
-
-  client.subscribe("picture/pic/effect");
-  client.subscribe("picture/effect/speed");
-  client.subscribe("picture/pic/effect/color");
-  client.subscribe("picture/pic/effect/brightness");
-
-  client.subscribe("picture/effect_one_color");
-  client.subscribe("picture/red");
-  client.subscribe("picture/green");
-  client.subscribe("picture/blue");
-
-  client.subscribe("picture/wall/effect");
-  client.subscribe("picture/wall/effect/color");
-  client.subscribe("picture/wall/effect/brightness");
-
-  client.subscribe("picture/auto/start/hour");
-  client.subscribe("picture/auto/start/min");
-  client.subscribe("picture/auto/end/hour");
-  client.subscribe("picture/auto/end/min");
-
-  client.subscribe("picture/pic/auto");
-  client.subscribe("picture/pic/auto/place");
-  client.subscribe("picture/pic/auto/timer");
-  client.subscribe("picture/pic/auto/effect");
-  
-  client.subscribe("picture/wall/auto");
-  client.subscribe("picture/wall/auto/timer");
-  client.subscribe("picture/wall/auto/place");
-  client.subscribe("picture/wall/auto/effect");
+  client.subscribe("admiss/state");
+  client.subscribe("admiss/connect");
 }
