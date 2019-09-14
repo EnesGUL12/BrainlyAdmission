@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <OneButton.h>
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 
 #include <main.h>
 #include <Display.h>
@@ -8,27 +8,38 @@
 #include <Wifi.h>
 
 OneButton button(16, false);
-SoftwareSerial SIM800(0,2);
+//SoftwareSerial SIM800(0,2);
 
 unsigned long timer_welcome;
+unsigned long timer_wait;
 
 bool flag_wait = true;
 bool flag_welcome;
 bool flag_at_home;
 
+String str_state;
+char char_state[10];
+
 
 
 void click1(){
-  if(!flag_online && !flag_wait){
-    flag_wait = true;
+  if(flag_wait){ // режим ожидания
+    flag_wait = false; // то выключаем режим ожидания
   }
-  if(flag_at_home){
-    flag_online = false;
+  if(!flag_online && !flag_wait){ // если не авторизованы и не ожидаем
+    flag_wait = true; // включаем режим ожидания
+  }
+  if(flag_at_home){ // если дома
+    flag_online = false; // то меням на режим не дома или выход
     flag_at_home = false;
+    client.publish("admiss/state", "exit");
+    str_state = "not_at_home";
+    str_state.toCharArray(char_state, 10);
     display.clearDisplay();
     writeExit();
     delay(1000);
     display.clearDisplay();
+    display.display();
   } 
 }
 
@@ -51,17 +62,14 @@ void callback(char* topic, byte* payload, unsigned int length) { // Функци
   Serial.println();
 
 
-  if(strTopic == "picture/connect"){
-    if(strPayload == "info"){
-      client.publish("picture/connect", "connected");
+  if(strTopic == "admiss/connect"){
+    if(strPayload == "info"){ // Проверка подключения(только для приложения)
+      client.publish("admiss/connect", "connected");
     }
   }
-
-  else if(strTopic == "picture/info"){
-    if(strPayload == "info"){
-      //client.publish("picture/info", char_hours);
-      delay(5000);
-      //client.publish("picture/info", char_min);
+  else if(strTopic == "admiss/state"){ 
+    if(strPayload == "info"){ // отправляем состояние
+      client.publish("admiss/state", char_state);
     }
   }
 }
@@ -70,9 +78,9 @@ void callback(char* topic, byte* payload, unsigned int length) { // Функци
 
 void setup() {
   Serial.begin(9600);
-  SIM800.begin(9600);
-  SIM800.println("AT");
-  Serial.println("SIM800 is active");  
+  //SIM800.begin(9600);
+  //SIM800.println("AT");
+  //Serial.println("SIM800 is active");  
 
   button.attachClick(click1);
 
@@ -90,48 +98,60 @@ void loop() {
     reconnect(); // Переподключаемся
     topicSub();
     client.setCallback(callback);
+    writeText("ERROR",2,0,0);
+    writeText("CHECK",2,0,20);
+    writeText("WIFI",2,0,40);
+    display.clearDisplay();
   }
+  else{
+    //if(SIM800.available()){
+      //Serial.write(SIM800.read());
+    //}
+    //if(Serial.available()){
+      //SIM800.write(Serial.read());
+    //}
 
-  if(SIM800.available()){
-    Serial.write(SIM800.read());
-  }
-  if(Serial.available()){
-    SIM800.write(Serial.read());
-  }
+    button.tick();
 
-
-  button.tick();
-  display.display();
-
-  if(flag_wait){
-    writeWait();
-    if(rfid.PICC_IsNewCardPresent()){ // Если увидели новую карту, то читаем 
-		  readRFID();
-	  }
-  }
-
-  if(flag_online){ // Если мы дома
-    if(flag_wait){ // Если был включен режим ожидания
-      display.clearDisplay();
-      display.display();
-      flag_wait = false;
-      flag_welcome = true;
-      timer_welcome = millis();
-    }
-
-    else if(flag_welcome){
-      writeWelcom(person[id_person]);
-      if(millis() - timer_welcome > WELCOME_TIMER){ // Если только что зашли, отсчитываем таймер для откючения надписи
-        timer_welcome = millis();
-        flag_welcome = false;
-        flag_at_home = true;
-        display.clearDisplay();
-        display.display();
+    if(flag_wait){ // Режим ожидания карточки
+      if(millis() - timer_wait > WAIT_TIMER_TIME){
+        timer_wait = millis();
+        flag_wait = false;
+      }
+      str_state = "wait";
+      str_state.toCharArray(char_state, 10);
+      writeWait();
+      if(rfid.PICC_IsNewCardPresent()){ // Если увидели новую карту, то читаем 
+        readRFID();
       }
     }
 
-    else if(flag_at_home){ // Если мы дома то показываем на дисплее, что кто то дома 
-      writeAtHome();
+    if(flag_online){ // Если мы дома
+      if(flag_wait){
+        display.clearDisplay();
+        display.display();
+        flag_wait = false;
+        flag_welcome = true;
+        timer_welcome = millis();
+        str_state = "at_home";
+        str_state.toCharArray(char_state, 10);
+        client.publish("admiss/state","enter"); // Говорим что мы вошли
+      }
+
+      else if(flag_welcome){
+        writeWelcom(person[id_person]);
+        if(millis() - timer_welcome > WELCOME_TIMER){ // Если только что зашли, отсчитываем таймер для откючения надписи
+          timer_welcome = millis();
+          flag_welcome = false;
+          flag_at_home = true;
+          display.clearDisplay();
+          display.display();
+        }
+      }
+
+      else if(flag_at_home){ // Если мы дома то показываем на дисплее, что кто то дома 
+        writeAtHome();
+      }
     }
   }
   client.loop();
