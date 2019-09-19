@@ -8,7 +8,7 @@
 #include <Wifi.h>
 
 OneButton button(16, false);
-//SoftwareSerial SIM800(0,2);
+//SoftwareSerial SIM800(10,9);
 
 unsigned long timer_welcome;
 unsigned long timer_wait;
@@ -99,6 +99,10 @@ void setup() {
   RFIDSetup();
 
   setupWifi();
+
+  writeLogo();
+  delay(5000);
+  display.setFont();
 }
 
 
@@ -112,9 +116,9 @@ void loop() {
     writeText("CHECK",2,0,20);
     writeText("WIFI",2,0,40);
     display.clearDisplay();
+  }
 
   
-  }
   else{
     //if(SIM800.available()){
       //Serial.write(SIM800.read());
@@ -124,6 +128,7 @@ void loop() {
     //}
 
     button.tick();
+    drawPower();
 
     if(flag_wait){ // Режим ожидания карточки
       if(millis() - timer_wait > WAIT_TIMER_TIME){ // Если прошло больше n времени то возвращаемся в режим не дома
