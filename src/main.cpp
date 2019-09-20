@@ -21,7 +21,6 @@ String str_state;
 char char_state[10];
 
 //TODO: Добавить GSM модуль
-//TODO: Добавить индикатор питания
 
 void click1(){
   if(flag_wait){ // режим ожидания
@@ -128,7 +127,10 @@ void loop() {
     //}
 
     button.tick();
-    drawPower();
+
+    if(!flag_wait && !flag_online){
+      drawPower();
+    }
 
     if(flag_wait){ // Режим ожидания карточки
       if(millis() - timer_wait > WAIT_TIMER_TIME){ // Если прошло больше n времени то возвращаемся в режим не дома
