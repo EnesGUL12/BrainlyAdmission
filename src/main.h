@@ -2,4 +2,5 @@
 #define RST_PIN 0
 #define WAIT_TIMER_TIME 20000
 #define WELCOME_TIMER 10000
+#define SPEED_POWER 70
 

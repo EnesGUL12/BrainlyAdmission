@@ -130,6 +130,7 @@ void loop() {
 
     if(!flag_wait && !flag_online){
       drawPower();
+      display.clearDisplay();
     }
 
     if(flag_wait){ // Режим ожидания карточки

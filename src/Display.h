@@ -81,9 +81,9 @@ void writeLogo(){
   display.setTextColor(WHITE);
   display.setFont(&FreeMonoBold12pt7b);
   display.setCursor(20,30);
-  display.print("WhoMen");
-  display.setCursor(0,50);
-  display.print("Technolog");
+  display.print("WhoMan");
+  display.setCursor(40,50);
+  display.print("Tech");
   display.display();
 }
 
@@ -91,7 +91,7 @@ void writeLogo(){
 
 void drawPower(){
   if(direct_up){
-    if(millis() - timer_power > 10){
+    if(millis() - timer_power > SPEED_POWER){
       timer_power = millis();
       power_i++;
       if(power_i >= 5){
@@ -100,7 +100,7 @@ void drawPower(){
     }
   }
   else{
-    if(millis() - timer_power > 10){
+    if(millis() - timer_power > SPEED_POWER){
       timer_power = millis();
       power_i--;
       if(power_i <= 0){
@@ -108,7 +108,7 @@ void drawPower(){
       }
     }
   }
-  display.drawCircle(display.width() - 10, 10, power_i, INVERSE);
+  display.drawCircle(display.width() - 10, display.height() - 10, power_i, WHITE);
   display.display();
 }
   
