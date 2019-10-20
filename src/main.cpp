@@ -98,6 +98,7 @@ void setup() {
   RFIDSetup();
 
   setupWifi();
+  setupWifiUpd();
 
   writeLogo();
   delay(5000);
@@ -181,4 +182,5 @@ void loop() {
     }
   }
   client.loop();
+  ArduinoOTA.handle(); // Всегда готовы к прошивке
 }

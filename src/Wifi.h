@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h> // Библиотека для OTA-прошивки
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -66,4 +69,12 @@ void reconnect() { // Если мы потеряли подключение то
 void topicSub(){ // Подписываемся на топики
   client.subscribe("admiss/state");
   client.subscribe("admiss/connect");
+}
+
+
+
+void setupWifiUpd(){
+  ArduinoOTA.setHostname("ESP8266-Admiss"); // Задаем имя сетевого порта
+  //ArduinoOTA.setPassword((const char *)"0000"); // Задаем пароль доступа для удаленной прошивки
+  ArduinoOTA.begin(); // Инициализируем OTA
 }
